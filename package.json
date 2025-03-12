@@ -1,0 +1,16 @@
+{
+  "name": "serverside1",  // Changed name to "serverside1" for consistency with repository
+  "version": "1.0.0",
+  "description": "Server for Greenleaf Organics website to handle signup and login",
+  "main": "server.js",
+  "dependencies": {
+    "express": "^4.17.1",
+    "body-parser": "^1.19.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "Your Name",
+  "license": "ISC"
+}
