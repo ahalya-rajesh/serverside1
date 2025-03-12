@@ -1,0 +1,98 @@
+// server.js
+
+// Import necessary modules
+const express = require('express');
+const bodyParser = require('body-parser');
+const fs = require('fs');
+
+const app = express();
+const port = process.env.PORT || 3000;
+
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
+app.use(express.static('public'));
+
+// --- Signup Endpoint ---
+app.post('/signup', (req, res) => {
+    fs.readFile('users.json', 'utf8', (err, data) => {
+        let users = [];
+        if (!err) {
+            try {
+                users = JSON.parse(data);
+            } catch (parseError) {
+                console.error("Error parsing users.json:", parseError);
+                return res.status(500).send('Server error reading user data.');
+            }
+        } else if (err.code !== 'ENOENT') {
+            console.error("Error reading users.json:", err);
+            return res.status(500).send('Server error reading user data.');
+        }
+
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).send('Email and password are required.');
+        }
+
+        const userExists = users.some(user => user.email === email);
+        if (userExists) {
+            return res.status(409).send('Email already registered.');
+        }
+
+        const newUser = {
+            email: email,
+            password: password,
+            timestamp: new Date().toISOString()
+        };
+
+        users.push(newUser);
+
+        fs.writeFile('users.json', JSON.stringify(users, null, 2), (writeErr) => {
+            if (writeErr) {
+                console.error("Error writing to users.json:", writeErr);
+                return res.status(500).send('Server error saving user data.');
+            }
+            console.log(`User signed up: ${email}`);
+            res.send('Signup successful!');
+        });
+    });
+});
+
+// --- Login Endpoint ---
+app.post('/login', (req, res) => {
+    fs.readFile('users.json', 'utf8', (err, data) => {
+        if (err) {
+            console.error("Error reading users.json for login:", err);
+            return res.status(500).send('Server error reading user data.');
+        }
+
+        let users = [];
+        try {
+            users = JSON.parse(data);
+        } catch (parseError) {
+            console.error("Error parsing users.json for login:", parseError);
+            return res.status(500).send('Server error reading user data.');
+        }
+
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).send('Email and password are required.');
+        }
+
+        const user = users.find(user => user.email === email && user.password === password);
+
+        if (user) {
+            console.log(`User logged in: ${email}`);
+            res.send('Login successful!');
+        } else {
+            console.log(`Login failed for email: ${email}`);
+            res.status(401).send('Invalid email or password.');
+        }
+    });
+});
+
+app.listen(port, () => {
+    console.log(`Server listening on port http://localhost:${port}`);
+});
