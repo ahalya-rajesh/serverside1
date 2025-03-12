@@ -1,5 +1,5 @@
 {
-  "name": "serverside1",  // Changed name to "serverside1" for consistency with repository
+  "name": "serverside1",
   "version": "1.0.0",
   "description": "Server for Greenleaf Organics website to handle signup and login",
   "main": "server.js",
